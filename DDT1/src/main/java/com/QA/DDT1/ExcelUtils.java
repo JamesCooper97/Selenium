@@ -30,9 +30,9 @@ public class ExcelUtils {
 		return ExcelSheet;
 	}
 
-	public static String getCellData(int RowNum, int ColNum) {
+	public static String getCellData(int Row, int Col) {
 		try {
-			Cell = ExcelSheet.getRow(RowNum).getCell(ColNum);
+			Cell = ExcelSheet.getRow(Row).getCell(Col);
 			String CellData = Cell.getStringCellValue();
 			return CellData;
 		} catch (Exception e) {
@@ -59,5 +59,4 @@ public class ExcelUtils {
 			e.printStackTrace();
 		}
 	}
-
 }
