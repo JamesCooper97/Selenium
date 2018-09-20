@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -29,7 +30,9 @@ public class DDTTest {
 	WebDriver driver = null;
 	Actions action = null;
 	FileInputStream file = null;
+	FileOutputStream fileOut = null;
 	XSSFWorkbook workbook = null;
+	int i = 0;
 	
 	public static ExtentReports report;
 	public ExtentTest test;
@@ -41,6 +44,8 @@ public class DDTTest {
 	
 	@Before
 	public void setup() {
+		i++;
+		test = report.startTest("Starting Test" + i);
 		System.setProperty("webdriver.chrome.driver", "C:/Users/Admin/Desktop/chromedriver.exe");
 		driver = new ChromeDriver();
 		driver.manage().window().maximize();
@@ -50,21 +55,23 @@ public class DDTTest {
 	@Test
 	public void test1() throws FileNotFoundException, IOException{
 		test = report.startTest("Open File");
-		file = new FileInputStream (Constant.Path_TestData + Constant.File_TestData);
-		test.log(LogStatus.INFO,"File Opened");
-		workbook = new XSSFWorkbook(file);
-		test.log(LogStatus.INFO, "Workbook Opened");
+		test.log(LogStatus.INFO,"Report Initialised");
+		
+		ExcelUtils.setExcelFile();
+		test.log(LogStatus.INFO, "Workbook Opened and sheet selected");
+		
+//		XSSFSheet sheet = ExcelUtils.getExcelSheet();
+//		test.log(LogStatus.INFO,"Sheet Retrieved");
 		
 		driver.get(Constant.URLAddUser);
 		test.log(LogStatus.INFO, "Driver Initiated");
-		XSSFSheet sheet = workbook.getSheetAt(0);
-		test.log(LogStatus.INFO, "1st sheet opened");
+
 		AddUser user = PageFactory.initElements(driver, AddUser.class);
 		LoginPage login = PageFactory.initElements(driver, LoginPage.class);
 
 		for (int i = 1 ; i < 5 ; i++) {
-			String username = sheet.getRow(i).getCell(0).getStringCellValue();
-			String password = sheet.getRow(i).getCell(1).getStringCellValue();
+			String username = ExcelUtils.getCellData(i, 0);
+			String password = ExcelUtils.getCellData(i, 1);
 			user.addUser(username);
 			user.addPassword(password);
 			user.clickSave();
@@ -75,8 +82,10 @@ public class DDTTest {
 			WebElement checkElement = driver.findElement(By.xpath("/html/body/table/tbody/tr/td[1]/big/blockquote/blockquote/font/center/b"));
 			if (checkElement.getText().equals("**Successful Login**")) {
 				test.log(LogStatus.PASS, "The add user and login passed");
+				ExcelUtils.setCellData("Pass", i, 2);
 			} else {
 				test.log(LogStatus.FAIL, "There is no spoon");
+				ExcelUtils.setCellData("Fail", i, 2);
 			}
 			assertEquals(checkElement.getText(),"**Successful Login**");
 			login.clickAddUserLink();
