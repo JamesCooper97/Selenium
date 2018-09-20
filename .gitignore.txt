@@ -1,4 +1,0 @@
-.metadata/
-.recommenders/
-.tax/
-.shopping.zip/
